@@ -1,0 +1,22 @@
+# Use a modern version of the Docker Compose file format.
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BROKER_URL: ${BROKER_URL}
+        CLIENT_ID: ${CLIENT_ID}
+        DATABASE_URL: ${DATABASE_URL}
+        TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+        TELEGRAM_CHAT_IDS: ${TELEGRAM_CHAT_IDS}
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    network_mode: "host"
+
+volumes:
+  postgres_data:
+
