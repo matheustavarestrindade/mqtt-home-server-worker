@@ -37,6 +37,7 @@ services:
       - CLIENT_ID=${CLIENT_ID}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_CHAT_IDS=${TELEGRAM_CHAT_IDS}
+      - MQTT_CLIENT_ID=${MQTT_CLIENT_ID}
     depends_on:
       db:
         condition: service_healthy

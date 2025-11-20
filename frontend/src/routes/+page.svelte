@@ -6,8 +6,19 @@
 	import { getUserSensorData, getUserSensors } from '$lib/remote/user.remote';
 	import HydroponicMangerCharts from './components/HydroponicMangerCharts.svelte';
 	import WaterLevelCharts from './components/WaterLevelCharts.svelte';
+	import { onMount } from 'svelte';
+	import { refreshAll } from '$app/navigation';
 
 	const userSensors = await getUserSensors();
+
+	let updateTimer: NodeJS.Timeout | undefined = undefined;
+
+	let REFRESH_INTERVAL = 60;
+	let timeToRefresh = $state(REFRESH_INTERVAL);
+
+	const refreshUserSensors = async () => {
+        await refreshAll();
+	};
 
 	interface Sensor {
 		id: string;
@@ -21,10 +32,7 @@
 		notifications: string[];
 	}
 
-	$inspect(userSensors);
-
 	const HOURS_TO_FETCH = 2;
-
 	const sensors: Sensor[] = userSensors.map((sensor) => {
 		const lastSeen = new Date(sensor.last_seen).getTime();
 		const now = Date.now();
@@ -42,18 +50,34 @@
 			notifications: []
 		};
 	});
+
+	onMount(() => {
+		updateTimer = setInterval(() => {
+			if (timeToRefresh > 0) {
+				timeToRefresh -= 1;
+				return;
+			}
+			timeToRefresh = REFRESH_INTERVAL;
+			refreshUserSensors();
+		}, 1000); 
+
+		return () => {
+			if (updateTimer) {
+				clearInterval(updateTimer);
+			}
+		};
+	});
 </script>
 
 <div class="flex-1 space-y-6 p-8 pt-6">
-	<!-- Header -->
-	<div class="flex items-center justify-between">
-		<div>
+	<div class="flex items-center justify-between flex-wrap gap-4">
+		<div class="min-w-[360px]">
 			<h1 class="text-3xl font-bold tracking-tight">Sensor Dashboard</h1>
 			<p class="mt-2 text-muted-foreground">Monitor your connected sensors and their real-time status</p>
 		</div>
 		<Button>
 			<Activity class="mr-2 h-4 w-4" />
-			Refresh All
+			Refreshing in {timeToRefresh}s
 		</Button>
 	</div>
 

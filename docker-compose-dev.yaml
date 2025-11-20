@@ -1,7 +1,23 @@
-# Use a modern version of the Docker Compose file format.
 version: '3.8'
 
 services:
+  # PostgreSQL Database with volume storage
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Existing App Service
   app:
     build:
       context: .
@@ -9,14 +25,42 @@ services:
       args:
         BROKER_URL: ${BROKER_URL}
         CLIENT_ID: ${CLIENT_ID}
-        DATABASE_URL: ${DATABASE_URL}
+        # Pass the internal docker URL to the build if needed, 
+        # or rely on the environment variable override below.
+        DATABASE_URL: postgres://${DB_USER:-postgres}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-app_db}
         TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
         TELEGRAM_CHAT_IDS: ${TELEGRAM_CHAT_IDS}
     restart: unless-stopped
     ports:
-      - 3000:3000
-    network_mode: "host"
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - BROKER_URL=${BROKER_URL}
+      - CLIENT_ID=${CLIENT_ID}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_IDS=${TELEGRAM_CHAT_IDS}
+      - MQTT_CLIENT_ID="mqtt-dev"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # SvelteKit Frontend Service
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3001:3000"
+  #   environment:
+  #     - SERVICE_BASE_URL=http://app:3000
+  #     - PORT=3000
+  #     - HOST=0.0.0.0
+  #     - ORIGIN=http://localhost:3000 
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
 
 volumes:
-  postgres_data:
+  pgdata:
 

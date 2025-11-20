@@ -60,6 +60,9 @@ func (worker *MQTTClient) Start() error {
 	}
 
 	opts := mqtt.NewClientOptions()
+	fmt.Printf("Connecting to MQTT broker at %s\n", config.BrokerUrl)
+	fmt.Printf("Using Client ID: %s\n", config.ClientId)
+
 	opts.AddBroker(config.BrokerUrl)
 	opts.SetTLSConfig(tlsConfig)
 	opts.SetClientID(config.ClientId)

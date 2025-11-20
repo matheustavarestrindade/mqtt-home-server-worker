@@ -15,6 +15,7 @@ import (
 
 type Config struct {
 	DatabaseUrl string `env:"DATABASE_URL"`
+	ClientId    string `env:"MQTT_CLIENT_ID"`
 }
 type Instance struct {
 	Config     Config
@@ -35,7 +36,7 @@ func GetInstance() *Instance {
 			Database: db,
 			MQTTClient: services.NewMQTTClient(services.MQTTConfig{
 				BrokerUrl:         "mqtts://mosquitto.trindademedia.dev:8883",
-				ClientId:          "client",
+				ClientId:          config.ClientId, 
 				CaFilePath:        "./certs/ca.crt",
 				ClientCrtFilePath: "./certs/client.crt",
 				ClientKeyFilePath: "./certs/client.key",
@@ -89,5 +90,6 @@ func loadEnv() Config {
 
 	return Config{
 		DatabaseUrl: os.Getenv("DATABASE_URL"),
+		ClientId:    os.Getenv("MQTT_CLIENT_ID"),
 	}
 }

@@ -34,16 +34,17 @@
 	}
 </script>
 
-<Card class="min-width-[2O0px] flex-1 relative overflow-hidden">
-	<!-- Status indicator bar -->
-	<div class={`absolute top-0 left-0 h-full w-1 ${getStatusColor(sensor.status)}`}></div>
+<Card class="min-width-[2O0px] flex-1 max-w-full">
 	<CardHeader class="pb-3">
 		<div class="flex items-start justify-between">
 			<div>
 				<CardTitle class="text-lg">{sensor.name}</CardTitle>
 				<CardDescription class="mt-1">{sensor.id}</CardDescription>
 			</div>
-			<Badge variant={sensor.status === 'online' ? 'default' : sensor.status === 'warning' ? 'secondary' : 'destructive'}>
+			<Badge
+				variant={sensor.status === 'online' ? 'default' : sensor.status === 'warning' ? 'secondary' : 'destructive'}
+				class={`px-3 py-1 text-sm font-medium ${getStatusColor(sensor.status)}`}
+			>
 				{sensor.status}
 			</Badge>
 		</div>
