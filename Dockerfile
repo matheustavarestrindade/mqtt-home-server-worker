@@ -14,7 +14,6 @@ COPY . .
 # Build the Go application into a static binary.
 RUN CGO_ENABLED=0 go build -o /server cmd/server/main.go
 
-
 # ---- Final Stage ----
 FROM scratch
 

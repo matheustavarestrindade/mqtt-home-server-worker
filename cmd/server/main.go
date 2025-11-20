@@ -10,6 +10,7 @@ import (
 	"github.com/matheustavarestrindade/mqtt-home-server-worker/internal/http"
 	"github.com/matheustavarestrindade/mqtt-home-server-worker/internal/services"
 	hydroponic_manager_worker "github.com/matheustavarestrindade/mqtt-home-server-worker/internal/workers/hydroponic_manager"
+	water_meter_worker "github.com/matheustavarestrindade/mqtt-home-server-worker/internal/workers/water_meter"
 )
 
 type Config struct {
@@ -61,6 +62,7 @@ func main() {
 	AssertOrExit(err, "Failed to start MQTT worker")
 
 	hydroponic_manager_worker.NewHydroponicManagerListener(instance.Database, instance.MQTTClient)
+	water_meter_worker.NewWaterLevelMeterListener(instance.Database, instance.MQTTClient)
 
 	for instance.MQTTClient.IsRunning() {
 		time.Sleep(200 * time.Millisecond)

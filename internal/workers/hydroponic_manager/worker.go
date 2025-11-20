@@ -13,6 +13,9 @@ import (
 )
 
 const HydroponicManagerTopicID = 0
+const DeviceName = "Hydroponic Manager"
+const DeviceType = "hydroponic-manager"
+const DeviceDescription = "Hydroponic Manager Device"
 
 // List of suported Paylaods versions
 const (
@@ -58,7 +61,6 @@ func (hm *HydroponicManagerWorker) Handler(msg mqtt.Message) {
 	switch version {
 	case HydroponicManagerMessageV1:
 		message, err := hm_payload_v1.ParsePayload(parts)
-
 		if err != nil {
 			fmt.Printf("Failed to parse Hydroponic Manager message: %v\n", err)
 			return
@@ -76,7 +78,10 @@ func (hm *HydroponicManagerWorker) Handler(msg mqtt.Message) {
 	}
 
 	sr := hm.db.SensorRepository()
-	device, err := hm.createAndGetDeviceIfDoesNotExist(fuseID)
+	dr := hm.db.DeviceRepository()
+
+	// TODO:Parse payload to get location and wifi/battery status
+	device, err := dr.CreateAndGetDeviceIfDoesNotExist(fuseID, DeviceName, DeviceDescription, "Unknown", DeviceType, 0, 0)
 	if err != nil {
 		fmt.Printf("Failed to insert device: %v\n", err)
 		return
@@ -89,20 +94,4 @@ func (hm *HydroponicManagerWorker) Handler(msg mqtt.Message) {
 		return
 	}
 
-}
-
-func (hm *HydroponicManagerWorker) createAndGetDeviceIfDoesNotExist(fuseId string) (*database.Device, error) {
-	dr := hm.db.DeviceRepository()
-	ctx := context.Background()
-
-	device, err := dr.GetDeviceByFuseID(ctx, fuseId)
-	if err != nil {
-		fmt.Printf("Device with client ID %s not found, creating new device\n", fuseId)
-		device, err = dr.InsertDevice(context.Background(), fuseId, "Hydroponic Manager", "Hydroponic manager device")
-		if err != nil {
-			return nil, fmt.Errorf("failed to insert device: %v", err)
-		}
-	}
-
-	return device, nil
 }

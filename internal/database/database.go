@@ -3,11 +3,11 @@ package database
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Database struct {
-	conn             pgx.Conn
+	pool             *pgxpool.Pool
 	sensorRepository *SensorRepository
 	deviceRepository *DeviceRepository
 }
@@ -17,11 +17,11 @@ func New() *Database {
 }
 
 func (db *Database) Connect(databaseUrl string) error {
-	conn, err := pgx.Connect(context.Background(), databaseUrl)
+	pool, err := pgxpool.New(context.Background(), databaseUrl)
 	if err != nil {
 		return err
 	}
-	db.conn = *conn
+	db.pool = pool
 	return nil
 }
 
@@ -40,8 +40,6 @@ func (db *Database) DeviceRepository() *DeviceRepository {
 }
 
 func (db *Database) Close() error {
-	if db.conn.IsClosed() {
-		return nil
-	}
-	return db.conn.Close(context.Background())
+	db.pool.Close()
+	return nil
 }

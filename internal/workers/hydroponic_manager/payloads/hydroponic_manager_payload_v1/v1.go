@@ -353,6 +353,8 @@ func DecompressDataFromDatabase(compressedData string) (Data, error) {
 			data.Relay.IsOn = isOn
 			data.Relay.NextToggleInSeconds = nextToggleInSeconds
 		default:
+			fmt.Printf("Warning: Unknown data key: %s\n", key)
+			fmt.Printf("Values for unknown key: %v\n", values)
 			return data, fmt.Errorf("unknown data key: %s", key)
 		}
 	}

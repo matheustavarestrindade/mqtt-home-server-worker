@@ -20,6 +20,7 @@ func NewServer(port int, database *database.Database) *Server {
 	}
 
 	http.HandleFunc("/sensors", server.sensorsEndpoint.GetSensorsByID)
+	http.HandleFunc("/sensor/data", server.sensorsEndpoint.GetSensorDataByIDAndTimestamp)
 	go func() {
 		http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 	}()

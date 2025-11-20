@@ -9,7 +9,7 @@ func (db *Database) RunMigrations() error {
 	ctx := context.Background()
 
 	// Start a transaction
-	tx, err := db.conn.Begin(ctx)
+	tx, err := db.pool.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to start transaction: %w", err)
 	}
@@ -48,6 +48,12 @@ func (db *Database) RunMigrations() error {
 			payload VARCHAR(128) NOT NULL,
 			created_at TIMESTAMPTZ DEFAULT NOW()
 		);`,
+		`ALTER TABLE devices ADD COLUMN IF NOT EXISTS location VARCHAR(255);`,
+		`ALTER TABLE devices ADD COLUMN IF NOT EXISTS device_type VARCHAR(100);`,
+		`ALTER TABLE devices ADD COLUMN IF NOT EXISTS wifi_strength INT;`,
+		`ALTER TABLE devices ADD COLUMN IF NOT EXISTS battery_percent INT;`,
+		`ALTER TABLE devices ADD COLUMN IF NOT EXISTS type VARCHAR(50);`,
+		`ALTER TABLE devices ADD COLUMN IF NOT EXISTS last_seen TIMESTAMPTZ DEFAULT NOW();`,
 	}
 
 	// Apply migrations sequentially

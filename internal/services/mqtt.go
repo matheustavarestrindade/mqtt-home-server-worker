@@ -65,6 +65,13 @@ func (worker *MQTTClient) Start() error {
 	opts.SetClientID(config.ClientId)
 	opts.SetKeepAlive(2 * time.Second)
 	opts.SetPingTimeout(1 * time.Second)
+	opts.SetAutoReconnect(true)
+
+	var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
+		fmt.Printf("MQTT connection lost: %v\n", err)
+	}
+
+	opts.SetConnectionLostHandler(connectLostHandler)
 
 	worker.client = mqtt.NewClient(opts)
 	if token := worker.client.Connect(); token.Wait() && token.Error() != nil {
